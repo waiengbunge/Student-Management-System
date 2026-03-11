@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% block title %}Personal Access Tokens{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width: 760px;">
+  <h2 class="mb-1">Personal Access Tokens</h2>
+  <p class="text-muted mb-4">
+    Tokens let external tools (e.g. a VS Code agent) call the API on your behalf.
+    Each token is shown <strong>only once</strong> — copy it immediately after creation.
+  </p>
+
+  {% if messages %}
+    {% for m in messages %}
+      <div class="alert alert-{{ m.tags|default:'info' }} alert-dismissible fade show" role="alert">
+        {{ m }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  {% if new_token %}
+  <div class="alert alert-success border border-success" role="alert">
+    <strong>Your new token (copy it now — it will not be shown again):</strong>
+    <div class="input-group mt-2">
+      <input type="text" id="newTokenValue" class="form-control font-monospace"
+             value="{{ new_token }}" readonly>
+      <button class="btn btn-outline-secondary" type="button" id="copyTokenBtn"
+              onclick="copyToken()">Copy</button>
+    </div>
+    <small class="text-muted">
+      Use it in the <code>Authorization</code> header:
+      <code>Authorization: ****** {{ new_token }}</code>
+    </small>
+  </div>
+  {% endif %}
+
+  <!-- Create form -->
+  <div class="card mb-4">
+    <div class="card-header">Generate a new token</div>
+    <div class="card-body">
+      <form method="post" action="{% url 'personal_tokens_create' %}">
+        {% csrf_token %}
+        <div class="row g-2 align-items-end">
+          <div class="col-sm-7">
+            <label for="tokenName" class="form-label">Token name</label>
+            <input type="text" id="tokenName" name="name" class="form-control"
+                   placeholder="e.g. VS Code Agent" maxlength="120" required>
+          </div>
+          <div class="col-sm-3">
+            <label for="tokenExpiry" class="form-label">Expires in (days)</label>
+            <input type="number" id="tokenExpiry" name="expires_days" class="form-control"
+                   placeholder="Never" min="1" max="3650">
+          </div>
+          <div class="col-sm-2 d-grid">
+            <button class="btn btn-primary" type="submit">Generate</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Existing tokens table -->
+  <div class="card">
+    <div class="card-header">Active tokens</div>
+    {% if tokens %}
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Name</th>
+            <th>Prefix</th>
+            <th>Last used</th>
+            <th>Expires</th>
+            <th>Created</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for tok in tokens %}
+          <tr>
+            <td>{{ tok.name }}</td>
+            <td><code>{{ tok.key_prefix }}…</code></td>
+            <td>{{ tok.last_used_at|default:"Never" }}</td>
+            <td>
+              {% if tok.expires_at %}
+                <span class="{% if tok.is_expired %}text-danger{% endif %}">
+                  {{ tok.expires_at|date:"Y-m-d" }}{% if tok.is_expired %} (expired){% endif %}
+                </span>
+              {% else %}
+                <span class="text-muted">Never</span>
+              {% endif %}
+            </td>
+            <td>{{ tok.created_at|date:"Y-m-d" }}</td>
+            <td>
+              <form method="post"
+                    action="{% url 'personal_tokens_delete' tok.pk %}"
+                    onsubmit="return confirm('Revoke token "{{ tok.name }}"? This cannot be undone.');">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-outline-danger" type="submit">Revoke</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="card-body text-muted">No tokens yet. Generate one above.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function copyToken() {
+  var input = document.getElementById('newTokenValue');
+  input.select();
+  input.setSelectionRange(0, 99999);
+  try {
+    navigator.clipboard.writeText(input.value);
+  } catch (e) {
+    document.execCommand('copy');
+  }
+  var btn = document.getElementById('copyTokenBtn');
+  btn.textContent = 'Copied!';
+  setTimeout(function(){ btn.textContent = 'Copy'; }, 2000);
+}
+</script>
+{% endblock %}
