@@ -1,0 +1,21 @@
+{% extends 'layouts/base_dashboard.html' %}
+{% block title %}Create User — Admin{% endblock %}
+{% block content %}
+<h3>Create User</h3>
+<form method="post">{% csrf_token %}
+  <div class="row">
+    <div class="col-md-6 mb-3"><label>First name</label><input class="form-control" name="first_name" required></div>
+    <div class="col-md-6 mb-3"><label>Last name</label><input class="form-control" name="last_name" required></div>
+  </div>
+  <div class="row">
+    <div class="col-md-6 mb-3"><label>Email</label><input class="form-control" name="email" type="email" required></div>
+    <div class="col-md-6 mb-3"><label>Phone</label><input class="form-control" name="phone"></div>
+  </div>
+  <div class="row">
+    <div class="col-md-6 mb-3"><label>Username</label><input class="form-control" name="username" required></div>
+    <div class="col-md-6 mb-3"><label>Password</label><input class="form-control" name="password" type="password" required></div>
+  </div>
+  <div class="mb-3"><label>Status</label><input class="form-control" name="status"></div>
+  <div><button class="btn btn-primary">Create</button> <a class="btn btn-link" href="{% url 'admin_user_list' %}">Cancel</a></div>
+</form>
+{% endblock %}

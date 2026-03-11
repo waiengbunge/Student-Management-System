@@ -1,0 +1,8 @@
+// Bootstrap variables override example
+$primary: #0b5cff;
+
+@import "bootstrap/scss/bootstrap";
+
+// Custom overrides
+body { background: #f4f6f9; }
+.sidebar { background: #fff; border-right: 1px solid #eaecef; }

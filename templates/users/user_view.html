@@ -1,0 +1,14 @@
+{% extends 'layouts/base_dashboard.html' %}
+{% block title %}User — {{ user_obj.email }}{% endblock %}
+{% block content %}
+<h3>User Detail</h3>
+<table class="table">
+  <tr><th>Name</th><td>{{ user_obj.profile.first_name }} {{ user_obj.profile.last_name }}</td></tr>
+  <tr><th>Email</th><td>{{ user_obj.email }}</td></tr>
+  <tr><th>Username</th><td>{{ user_obj.username }}</td></tr>
+  <tr><th>Phone</th><td>{{ user_obj.phone }}</td></tr>
+  <tr><th>Roles</th><td>{% for ur in user_obj.user_roles.all %}{{ ur.role.name }}{% if not forloop.last %}, {% endif %}{% empty %}&mdash;{% endfor %}</td></tr>
+  <tr><th>Active</th><td>{{ user_obj.is_active|yesno:"Yes,No" }}</td></tr>
+</table>
+<a class="btn btn-link" href="{% url 'admin_user_list' %}">Back to list</a>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Attendance Record{% endblock %}
+{% block content %}
+<h3>Attendance Record</h3>
+<div class="card p-3">
+  <form class="row g-3">
+    <div class="col-md-3"><input class="form-control" placeholder="Date" /></div>
+    <div class="col-md-3"><input class="form-control" placeholder="Course/Class" /></div>
+    <div class="col-md-3"><button class="btn btn-primary">Filter</button></div>
+  </form>
+  <div class="table-responsive mt-3">
+    <table class="table">
+      <thead><tr><th>Date</th><th>Student</th><th>Status</th></tr></thead>
+      <tbody><tr><td>2026-03-01</td><td>Jane Doe</td><td><span class="badge bg-success">Present</span></td></tr></tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

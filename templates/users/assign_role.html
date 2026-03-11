@@ -1,0 +1,16 @@
+{% extends 'layouts/base_dashboard.html' %}
+{% block title %}Assign Role — {{ user_obj.email }}{% endblock %}
+{% block content %}
+<h3>Assign Role to {{ user_obj.email }}</h3>
+<form method="post">{% csrf_token %}
+  <div class="mb-3">
+    <label>Role</label>
+    <select name="role" class="form-select">
+      {% for r in roles %}
+      <option value="{{ r.pk }}">{{ r.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div><button class="btn btn-primary">Assign</button> <a class="btn btn-link" href="{% url 'admin_user_list' %}">Cancel</a></div>
+</form>
+{% endblock %}

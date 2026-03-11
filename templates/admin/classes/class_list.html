@@ -1,0 +1,34 @@
+{% extends 'layouts/base_dashboard.html' %}
+{% block title %}Classrooms — Admin{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3>Classrooms</h3>
+  <div>
+    <a class="btn btn-primary" href="{% url 'admin_class_add' %}">Create Classroom</a>
+  </div>
+</div>
+<div class="row g-3 mb-3">
+  <div class="col-md-3"><div class="card p-3 text-center"><small class="text-muted">Total Classrooms</small><h3>{{ stats.total }}</h3></div></div>
+</div>
+<div class="card p-3">
+  <div class="table-responsive">
+    <table class="table">
+      <thead><tr><th>Name</th><th>Capacity</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for c in classes %}
+        <tr>
+          <td>{{ c.name }}</td>
+          <td>{{ c.capacity }}</td>
+          <td>
+            <a class="btn btn-sm btn-outline-secondary" href="{% url 'admin_class_edit' c.pk %}">Edit</a>
+            <a class="btn btn-sm btn-danger" href="{% url 'admin_class_delete' c.pk %}">Delete</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" class="text-center">No classrooms found</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

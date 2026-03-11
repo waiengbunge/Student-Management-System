@@ -1,0 +1,10 @@
+{% extends 'layouts/base_dashboard.html' %}
+{% block title %}Create Role — Admin{% endblock %}
+{% block content %}
+<h3>Create Role</h3>
+<form method="post">{% csrf_token %}
+  <div class="mb-3"><label>Name</label><input class="form-control" name="name" required></div>
+  <div class="mb-3"><label>Code</label><input class="form-control" name="code" required></div>
+  <div><button class="btn btn-primary">Create</button> <a class="btn btn-link" href="{% url 'admin_roles_list' %}">Cancel</a></div>
+</form>
+{% endblock %}

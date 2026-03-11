@@ -1,0 +1,43 @@
+{% extends 'layouts/base_dashboard.html' %}
+{% block title %}Scheduling — Admin{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+	<h3>Scheduling</h3>
+	<form class="d-flex" method="get">
+		<input name="q" class="form-control me-2" placeholder="Search classroom or course">
+		<button class="btn btn-outline-primary">Search</button>
+	</form>
+</div>
+
+<div class="row g-3 mb-3">
+	<div class="col-md-3"><div class="card p-3 text-center"><small class="text-muted">Classrooms</small><h3>{{ stats.classrooms }}</h3></div></div>
+	<div class="col-md-3"><div class="card p-3 text-center"><small class="text-muted">Courses</small><h3>{{ stats.courses }}</h3></div></div>
+</div>
+
+<div class="row">
+	<div class="col-md-6">
+		<div class="card p-3 mb-3">
+			<h5>Classrooms</h5>
+			<ul class="list-group">
+				{% for c in classrooms %}
+				<li class="list-group-item d-flex justify-content-between align-items-center">{{ c.name }} <span class="badge bg-secondary">{{ c.capacity|default:'-' }}</span></li>
+				{% empty %}
+				<li class="list-group-item">No classrooms</li>
+				{% endfor %}
+			</ul>
+		</div>
+	</div>
+	<div class="col-md-6">
+		<div class="card p-3 mb-3">
+			<h5>Courses</h5>
+			<ul class="list-group">
+				{% for c in courses %}
+				<li class="list-group-item">{{ c.code }} — {{ c.name }}</li>
+				{% empty %}
+				<li class="list-group-item">No courses</li>
+				{% endfor %}
+			</ul>
+		</div>
+	</div>
+</div>
+{% endblock %}

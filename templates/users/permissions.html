@@ -1,0 +1,24 @@
+{% extends 'layouts/base_dashboard.html' %}
+{% block title %}Permissions — Admin{% endblock %}
+{% block content %}
+<h3>Permissions</h3>
+<p>Manage role permissions (placeholder).</p>
+<div class="card p-3">
+  <h5>Roles</h5>
+  <ul>
+    {% for r in roles %}
+    <li><a href="{% url 'admin_role_permissions' r.pk %}">{{ r.name }}</a> ({{ r.code }})</li>
+    {% empty %}
+    <li>No roles defined</li>
+    {% endfor %}
+  </ul>
+  <h5>Permissions (first 200)</h5>
+  <ul>
+    {% for p in permissions %}
+    <li>{{ p.code }} — {{ p.module }}.{{ p.action }}</li>
+    {% empty %}
+    <li>No permissions</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

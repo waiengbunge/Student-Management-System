@@ -1,0 +1,13 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Requests{% endblock %}
+{% block content %}
+<h3>Requests</h3>
+<div class="card p-3">
+  <div class="table-responsive">
+    <table class="table">
+      <thead><tr><th>Ref</th><th>Student</th><th>Type</th><th>Status</th></tr></thead>
+      <tbody><tr><td>REQ-1</td><td>Jane Doe</td><td>Transcript</td><td><span class="badge bg-secondary">Pending</span></td></tr></tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'layouts/base_dashboard.html' %}
+{% block title %}Students — Admin{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3>Students</h3>
+  <div>
+    <a class="btn btn-outline-secondary me-2" href="?q=">Clear</a>
+    <a class="btn btn-primary" href="{% url 'admin_student_add' %}">Add Student</a>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-3"><div class="card p-3 text-center"><small class="text-muted">Total Students</small><h3>{{ stats.total }}</h3></div></div>
+  <div class="col-md-3"><div class="card p-3 text-center"><small class="text-muted">Active Students</small><h3>{{ stats.active }}</h3></div></div>
+</div>
+
+<div class="card p-3">
+  <div class="d-flex mb-2">
+    <form class="d-flex w-50" method="get">
+      <input name="q" class="form-control me-2" placeholder="Search name or id">
+      <button class="btn btn-outline-primary">Search</button>
+    </form>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead><tr><th>Student ID</th><th>Full Name</th><th>Program</th><th>Intake</th><th>Email</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for s in students %}
+        <tr>
+          <td>{{ s.student_number }}</td>
+          <td><a href="{% url 'admin_student_detail' s.pk %}">{{ s.first_name }} {{ s.last_name }}</a></td>
+          <td>{% if s.program %}{{ s.program.name }}{% else %}&mdash;{% endif %}</td>
+          <td>{{ s.intake_batch }}</td>
+          <td>{{ s.email }}</td>
+          <td>{{ s.status }}</td>
+          <td>
+            <a class="btn btn-sm btn-outline-secondary" href="{% url 'admin_student_edit' s.pk %}">Edit</a>
+            <a class="btn btn-sm btn-danger" href="{% url 'admin_student_delete' s.pk %}">Delete</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="text-center">No students found</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

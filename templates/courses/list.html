@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Courses — Acatech{% endblock %}
+
+{% block content %}
+<h2>Courses</h2>
+<div class="card">
+  <table class="table">
+    <thead><tr><th>Code</th><th>Name</th><th>Program</th><th>Credits</th></tr></thead>
+    <tbody>
+      {% for c in courses %}
+        <tr>
+          <td>{{ c.code }}</td>
+          <td>{{ c.name }}</td>
+          <td>{{ c.program.name }}</td>
+          <td>{{ c.credit_hours }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4">No courses found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if is_paginated %}
+    <div class="pagination">{% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}">Prev</a>{% endif %} Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }} {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}">Next</a>{% endif %}</div>
+  {% endif %}
+</div>
+{% block extra_js %}
+<script>
+  $(document).ready(function(){
+    $('.table').DataTable({
+      pageLength: 25,
+      ordering: true,
+      searching: true
+    });
+  });
+</script>
+{% endblock %}
+{% endblock %}

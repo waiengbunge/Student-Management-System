@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dashboard — Acatech{% endblock %}
+
+{% block content %}
+<div class="grid">
+  <div class="card-row">
+    {% include "partials/_card.html" with title="Students" value=students_count subtitle="Total enrolled" %}
+    {% include "partials/_card.html" with title="Courses" value=courses_count subtitle="Active courses" %}
+    {% include "partials/_card.html" with title="Staff" value=staff_count subtitle="Active staff" %}
+  </div>
+
+  <section class="card">
+    <h2>Quick Actions</h2>
+    <ul>
+      <li><a href="{% url 'blueprint:students_list' %}">View Students</a></li>
+      <li><a href="{% url 'blueprint:courses_list' %}">View Courses</a></li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2>Charts</h2>
+    <div class="row">
+      <div class="col-md-6">
+        <canvas id="enrollmentsChart" width="400" height="200"></canvas>
+      </div>
+      <div class="col-md-6">
+        <canvas id="passRateChart" width="200" height="200"></canvas>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function loadMetrics(){
+  const resp = await fetch('/api/v1/blueprint/metrics/');
+  if(!resp.ok) return;
+  const data = await resp.json();
+  // enrollments line chart
+  const months = data.enrollments_series.map(x=>x.month);
+  const counts = data.enrollments_series.map(x=>x.count);
+  const ctx = document.getElementById('enrollmentsChart');
+  if(ctx){
+    new Chart(ctx, {
+      type: 'line',
+      data: { labels: months, datasets: [{ label: 'Enrollments', data: counts, borderColor: '#0b5cff', backgroundColor: 'rgba(11,92,255,0.08)'}] },
+      options: { responsive: true }
+    });
+  }
+
+  // pass rate donut
+  const prCtx = document.getElementById('passRateChart');
+  if(prCtx){
+    new Chart(prCtx, {
+      type: 'doughnut',
+      data: { labels: ['Pass','Fail'], datasets:[{ data: [data.pass_rate, Math.max(0,100-data.pass_rate)], backgroundColor:['#28a745','#dc3545'] }] },
+      options: { responsive: true }
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadMetrics);
+</script>
+{% endblock %}

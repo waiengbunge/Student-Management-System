@@ -1,0 +1,13 @@
+{% extends 'layouts/base_dashboard.html' %}
+{% block title %}Training Manager Dashboard{% endblock %}
+{% block content %}
+<div class="row g-3">
+  <div class="col-md-3"><div class="card p-3"><h6>Active Classes</h6><h3>8</h3></div></div>
+  <div class="col-md-3"><div class="card p-3"><h6>Instructor Allocation</h6><h3>95%</h3></div></div>
+  <div class="col-md-3"><div class="card p-3"><h6>Pending SPR Approvals</h6><h3>5</h3></div></div>
+  <div class="col-md-3"><div class="card p-3"><h6>Special Exam Requests</h6><h3>1</h3></div></div>
+
+  <div class="col-lg-8"><div class="card p-3"><h5>Attendance Statistics</h5><canvas id="attendanceChart" height="140"></canvas></div></div>
+  <div class="col-lg-4"><div class="card p-3"><h5>Class Utilization</h5><canvas id="programDistribution" height="140"></canvas></div></div>
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Courses{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3>Courses</h3>
+  <a href="/courses/add/" class="btn btn-primary">New Course</a>
+</div>
+<div class="card p-3">
+  <div class="table-responsive">
+    <table class="table">
+      <thead><tr><th>Code</th><th>Name</th><th>Credits</th><th>Actions</th></tr></thead>
+      <tbody>
+        <tr><td>C101</td><td>Intro to Programming</td><td>3</td><td><a class="btn btn-sm btn-outline-secondary">Edit</a></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% load static %}
+<nav id="sidebar" class="sidebar bg-dark text-white p-3">
+  <div class="d-flex align-items-center mb-3">
+    <img src="{% static 'img/logo-placeholder.png' %}" alt="logo" width="36" class="me-2 rounded">
+    <strong>Acatech SMS</strong>
+    <button class="btn btn-sm btn-dark ms-auto d-md-none" data-bs-toggle="collapse" data-bs-target="#sidebarMenu"><i class="bi bi-list"></i></button>
+  </div>
+
+  <div class="collapse d-md-block" id="sidebarMenu">
+    <ul class="nav nav-pills flex-column">
+      {% comment %}Main links{% endcomment %}
+      <li class="nav-item"><a class="nav-link text-white {% if request.path == '/' or request.path == '/dashboard/' %}active{% endif %}" href="{% url 'dashboard' %}"> <i class="bi bi-speedometer2 me-2"></i> Dashboard</a></li>
+      {% if user_is_admin or is_admin_role %}
+        <li class="nav-header text-uppercase small text-muted mt-3 px-2">Admin</li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'admin/students' in request.path %}active{% endif %}" href="{% url 'admin_students_list' %}"> <i class="bi bi-people me-2"></i> Students</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'admin/programs' in request.path %}active{% endif %}" href="{% url 'admin_programs_list' %}"> <i class="bi bi-award me-2"></i> Programs</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'admin/courses' in request.path %}active{% endif %}" href="{% url 'admin_courses_list' %}"> <i class="bi bi-book me-2"></i> Courses</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'admin/classes' in request.path %}active{% endif %}" href="{% url 'admin_classes_list' %}"> <i class="bi bi-building me-2"></i> Classrooms</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'admissions' in request.path %}active{% endif %}" href="{% url 'admin_programs_list' %}"> <i class="bi bi-journal-check me-2"></i> Admissions</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'enrollment' in request.path %}active{% endif %}" href="{% url 'admin_enrollment' %}"> <i class="bi bi-folder-symlink me-2"></i> Enrollment</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'scheduling' in request.path %}active{% endif %}" href="{% url 'admin_scheduling' %}"> <i class="bi bi-calendar-event me-2"></i> Scheduling</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'attendance' in request.path %}active{% endif %}" href="{% url 'admin_attendance' %}"> <i class="bi bi-check2-square me-2"></i> Attendance</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'assessments' in request.path %}active{% endif %}" href="{% url 'admin_assessments' %}"> <i class="bi bi-pencil-square me-2"></i> Assessments</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'spr' in request.path %}active{% endif %}" href="{% url 'admin_spr' %}"> <i class="bi bi-file-earmark-text me-2"></i> SPR</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'exams' in request.path %}active{% endif %}" href="{% url 'admin_exams' %}"> <i class="bi bi-easel2 me-2"></i> Examinations</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'finance' in request.path %}active{% endif %}" href="{% url 'admin_finance' %}"> <i class="bi bi-cash-stack me-2"></i> Finance</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'requests' in request.path %}active{% endif %}" href="{% url 'admin_requests' %}"> <i class="bi bi-envelope me-2"></i> Requests</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'transcripts' in request.path %}active{% endif %}" href="{% url 'admin_transcripts' %}"> <i class="bi bi-file-earmark-medical me-2"></i> Transcripts</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'reports' in request.path %}active{% endif %}" href="{% url 'admin_reports' %}"> <i class="bi bi-graph-up me-2"></i> Reports</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'notifications' in request.path %}active{% endif %}" href="{% url 'admin_notifications' %}"> <i class="bi bi-bell me-2"></i> Notifications</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'users' in request.path %}active{% endif %}" href="{% url 'admin_users' %}"> <i class="bi bi-person me-2"></i> Users</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'settings' in request.path %}active{% endif %}" href="{% url 'admin_settings' %}"> <i class="bi bi-gear me-2"></i> Settings</a></li>
+      {% else %}
+        <li class="nav-item"><a class="nav-link text-white {% if 'students' in request.path %}active{% endif %}" href="/students/"> <i class="bi bi-people me-2"></i> Students</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'admissions' in request.path %}active{% endif %}" href="/admissions/"> <i class="bi bi-journal-check me-2"></i> Admissions</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'enrollment' in request.path %}active{% endif %}" href="/enrollment/"> <i class="bi bi-folder-symlink me-2"></i> Enrollment</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'programs' in request.path %}active{% endif %}" href="/programs/"> <i class="bi bi-award me-2"></i> Programs</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'courses' in request.path %}active{% endif %}" href="/courses/"> <i class="bi bi-book me-2"></i> Courses</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'classes' in request.path %}active{% endif %}" href="/classes/"> <i class="bi bi-building me-2"></i> Classes</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'scheduling' in request.path %}active{% endif %}" href="/scheduling/"> <i class="bi bi-calendar-event me-2"></i> Scheduling</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'attendance' in request.path %}active{% endif %}" href="/attendance/"> <i class="bi bi-check2-square me-2"></i> Attendance</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'assessments' in request.path %}active{% endif %}" href="/assessments/"> <i class="bi bi-pencil-square me-2"></i> Assessments</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'spr' in request.path %}active{% endif %}" href="/spr/"> <i class="bi bi-file-earmark-text me-2"></i> SPR Reports</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'exams' in request.path %}active{% endif %}" href="/exams/"> <i class="bi bi-easel2 me-2"></i> Examinations</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'finance' in request.path %}active{% endif %}" href="/finance/"> <i class="bi bi-cash-stack me-2"></i> Finance</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'requests' in request.path %}active{% endif %}" href="/requests/"> <i class="bi bi-envelope me-2"></i> Requests</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'transcripts' in request.path %}active{% endif %}" href="/transcripts/"> <i class="bi bi-file-earmark-medical me-2"></i> Transcripts</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'reports' in request.path %}active{% endif %}" href="/reports/"> <i class="bi bi-graph-up me-2"></i> Reports</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'notifications' in request.path %}active{% endif %}" href="/notifications/"> <i class="bi bi-bell me-2"></i> Notifications</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'users' in request.path %}active{% endif %}" href="/users/"> <i class="bi bi-person me-2"></i> Users</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if 'settings' in request.path %}active{% endif %}" href="/settings/"> <i class="bi bi-gear me-2"></i> Settings</a></li>
+      {% endif %}
+    </ul>
+  </div>
+</nav>

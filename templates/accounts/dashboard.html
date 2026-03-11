@@ -1,0 +1,87 @@
+{% extends 'layouts/base_dashboard.html' %}
+{% block title %}Admin — Overview{% endblock %}
+{% block content %}
+<div class="row g-3">
+  <div class="col-12 mb-2 d-flex justify-content-between align-items-center">
+    <h3 class="mb-0">Overview</h3>
+    <!-- removed stray text such as 'logn' -->
+  </div>
+
+  <div class="col-md-3">
+    <div class="card p-3 text-center">
+      <small class="text-muted">Users</small>
+      <h3 class="mt-2">{{ stats.user_count|default:0 }}</h3>
+      <small class="text-muted">Total registered</small>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card p-3 text-center">
+      <small class="text-muted">Students</small>
+      <h3 class="mt-2">{{ stats.students_count|default:0 }}</h3>
+      <small class="text-muted">Active learners</small>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card p-3 text-center">
+      <small class="text-muted">Programs</small>
+      <h3 class="mt-2">{{ stats.programs_count|default:0 }}</h3>
+      <small class="text-muted">Offered programs</small>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card p-3 text-center">
+      <small class="text-muted">Staff</small>
+      <h3 class="mt-2">{{ stats.staff_count|default:0 }}</h3>
+      <small class="text-muted">Admin & staff</small>
+    </div>
+  </div>
+
+  <div class="col-lg-6 mt-3">
+    <div class="card p-3">
+      <h5>Revenue (last 6 months)</h5>
+      <canvas id="revenueChart" height="160"></canvas>
+    </div>
+  </div>
+
+  <div class="col-lg-6 mt-3">
+    <div class="card p-3">
+      <h5>Program Distribution</h5>
+      <canvas id="programChart" height="160"></canvas>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  const revenueSeries = {{ revenue_series_json|default:'[]'|safe }};
+  const programDist = {{ program_distribution_json|default:'[]'|safe }};
+
+  // Revenue line chart
+  const revCtx = document.getElementById('revenueChart');
+  if(revCtx && revenueSeries.length){
+    const labels = revenueSeries.map(r=>r.month);
+    const data = revenueSeries.map(r=>r.value);
+    new Chart(revCtx, {
+      type: 'line',
+      data: { labels: labels, datasets: [{ label: 'Revenue', data: data, borderColor: '#0d6efd', backgroundColor: 'rgba(13,110,253,0.08)', fill: true }] },
+      options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+  }
+
+  // Program distribution donut
+  const progCtx = document.getElementById('programChart');
+  if(progCtx){
+    const labels = programDist.map(p=>p.label || 'Other');
+    const data = programDist.map(p=>p.value || 0);
+    const colors = ['#0d6efd','#198754','#ffc107','#dc3545','#6f42c1','#20c997','#fd7e14','#6610f2'];
+    new Chart(progCtx, {
+      type: 'doughnut',
+      data: { labels: labels, datasets: [{ data: data, backgroundColor: colors.slice(0, labels.length) }] },
+      options: { responsive: true }
+    });
+  }
+});
+</script>
+{% endblock %}

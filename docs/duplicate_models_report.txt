@@ -1,0 +1,23 @@
+Files containing AuditLog / Role / Permission definitions (potential duplicates)
+
+- apps/common/models.py
+  - defines: TimeStampedModel, ActivityLog, AuditLog (db_table = 'audit_logs')
+  - path: apps/common/models.py
+
+- platform/core/models.py
+  - defines: Organization, Role, Permission, AuditLog (model name AuditLog)
+  - path: platform/core/models.py
+
+- apps/accounts/models.py
+  - previously defined AuditLog but removed; still defines Role, Permission, RolePermission, UserRole
+  - path: apps/accounts/models.py
+
+Notes:
+- `apps/common.AuditLog` uses db_table 'audit_logs' and tenant-scoped fields; preferable for multi-tenant design.
+- `platform/core.AuditLog` is organization-scoped and may be part of a different module design.
+- I recommend reviewing `platform/core/models.py` vs `apps/common/models.py` to consolidate AuditLog into one canonical model (prefer `apps/common.AuditLog` for tenant isolation), and keeping `platform/core.Role`/`Permission` if it's intended for multi-organization roles (or remove duplicates).
+
+Recommended safe next steps:
+1. Review `platform/core` usages (search for imports of platform.core.AuditLog/Role/Permission).
+2. If `platform/core` is unused, remove or refactor it to import shared models from `apps.common`.
+3. Otherwise, create migration/aliases to avoid db_table conflicts.

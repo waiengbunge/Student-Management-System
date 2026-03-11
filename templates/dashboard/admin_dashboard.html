@@ -1,0 +1,24 @@
+{% extends 'layouts/base_dashboard.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<div class="row g-3">
+  <div class="col-md-3"><div class="card p-3 text-center"><small class="text-muted">Total Users</small><h3 class="mt-2">{{ stats.user_count|default:0 }}</h3></div></div>
+  <div class="col-md-3"><div class="card p-3 text-center"><small class="text-muted">Students</small><h3 class="mt-2">{{ stats.students_count|default:0 }}</h3></div></div>
+  <div class="col-md-3"><div class="card p-3 text-center"><small class="text-muted">Programs</small><h3 class="mt-2">{{ stats.programs_count|default:0 }}</h3></div></div>
+  <div class="col-md-3"><div class="card p-3 text-center"><small class="text-muted">Pending Requests</small><h3 class="mt-2">0</h3></div></div>
+
+  <div class="col-lg-6 mt-3"><div class="card p-3"><h5>Enrollment Trend</h5><canvas id="enrollmentsChart" height="140"></canvas></div></div>
+  <div class="col-lg-6 mt-3"><div class="card p-3"><h5>Fee Payments</h5><canvas id="paymentsChart" height="140"></canvas></div></div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  const enrollCtx = document.getElementById('enrollmentsChart');
+  if(enrollCtx){ new Chart(enrollCtx, {type:'line', data:{labels:['Jan','Feb','Mar'], datasets:[{label:'Enrollments', data:[10,12,8], borderColor:'#0d6efd', backgroundColor:'rgba(13,110,253,0.08)', fill:true}]}, options:{responsive:true}}); }
+  const payCtx = document.getElementById('paymentsChart');
+  if(payCtx){ new Chart(payCtx, {type:'bar', data:{labels:['Jan','Feb','Mar'], datasets:[{label:'Revenue', data:[1200,1900,1500], backgroundColor:'#198754'}]}, options:{responsive:true}}); }
+});
+</script>
+{% endblock %}

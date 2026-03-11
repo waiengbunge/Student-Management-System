@@ -1,0 +1,21 @@
+{% if created %}
+  <div class="alert alert-success">Student {{ student.student_number }} created successfully.</div>
+  <script>
+    // Close Bootstrap modal and refresh table if DataTable present
+    var modalEl = document.getElementById('entityModal');
+    if(modalEl){
+      var modal = bootstrap.Modal.getInstance(modalEl);
+      if(modal) modal.hide();
+    }
+    try{ if(window.$ && window.$.fn && $('#studentTable').DataTable) { $('#studentTable').DataTable().ajax.reload(); } }catch(e){}
+  </script>
+{% else %}
+  <form method="post" hx-post="{% url 'blueprint:students_add' %}" hx-target="#entityModalBody" hx-swap="innerHTML">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-primary">Create</button>
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    </div>
+  </form>
+{% endif %}
