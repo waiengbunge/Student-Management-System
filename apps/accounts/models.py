@@ -164,5 +164,6 @@ class ApiKey(TimeStampedModel):
     scopes_json = models.JSONField(default=dict, blank=True)
     last_used_at = models.DateTimeField(null=True, blank=True)
     expires_at = models.DateTimeField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
     class Meta:
         db_table = "api_keys"

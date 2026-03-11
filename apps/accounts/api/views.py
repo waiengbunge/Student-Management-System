@@ -1,14 +1,15 @@
 from rest_framework import viewsets, filters
-from apps.accounts.models import User, Role, Permission, ApiKey
+from apps.accounts.models import User, Role, Permission, ApiKey, UserRole
 from .serializers import UserSerializer, RoleSerializer, PermissionSerializer
 from .serializers import UserRoleSerializer
-from .serializers import ApiKeySerializer
+from .serializers import ApiKeySerializer, PersonalTokenSerializer
 from apps.accounts.drf_permissions import RolePermissionDRF
 from apps.api.pagination import StandardResultsSetPagination
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, permissions, mixins
 import hashlib
+import secrets
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -172,3 +173,28 @@ class ApiKeyViewSet(viewsets.ModelViewSet):
             # restrict to tenant or keys created by the user
             qs = qs.filter(tenant=tenant)
         return qs
+
+
+class PersonalTokenViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
+    """
+    Self-service Personal Access Token endpoint.
+    Queryset is hard-scoped to request.user — no admin role required.
+    Raw token returned once on creation only.
+    """
+
+    serializer_class = PersonalTokenSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return ApiKey.objects.filter(user=self.request.user, is_active=True)
+
+    def perform_destroy(self, instance):
+        # Revoke by deactivating rather than hard-deleting
+        instance.is_active = False
+        instance.key_hash = 'REVOKED'
+        instance.save(update_fields=['is_active', 'key_hash'])

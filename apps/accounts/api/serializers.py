@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from apps.accounts.models import User, Role, Permission, UserRole, ApiKey, UserProfile
+from django.utils import timezone
 import secrets
 import hashlib
 
@@ -167,6 +168,49 @@ class ApiKeySerializer(serializers.ModelSerializer):
             if tenant and tenant != getattr(request.user, 'tenant', None):
                 raise serializers.ValidationError('Cannot create ApiKey for a different tenant')
         return data
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        token = getattr(instance, '_plain_token', None)
+        if token:
+            data['token'] = token
+        return data
+
+
+class PersonalTokenSerializer(serializers.ModelSerializer):
+    """Serializer for self-service personal token management."""
+
+    # Returned only at creation
+    token = serializers.CharField(read_only=True)
+    # days until expiry (write-only input)
+    expires_in_days = serializers.IntegerField(write_only=True, required=False, min_value=1)
+
+    class Meta:
+        model = ApiKey
+        fields = ['id', 'name', 'key_prefix', 'last_used_at', 'expires_at', 'created_at', 'token', 'expires_in_days']
+        read_only_fields = ['key_prefix', 'last_used_at', 'expires_at', 'created_at']
+
+    def create(self, validated_data):
+        import datetime
+        expires_in_days = validated_data.pop('expires_in_days', None)
+        request = self.context['request']
+        token = secrets.token_urlsafe(32)
+        prefix = token[:8]
+        key_hash = hashlib.sha256(token.encode()).hexdigest()
+        expires_at = None
+        if expires_in_days:
+            expires_at = timezone.now() + datetime.timedelta(days=expires_in_days)
+        obj = ApiKey.objects.create(
+            tenant=request.user.tenant,
+            user=request.user,
+            name=validated_data['name'],
+            key_prefix=prefix,
+            key_hash=key_hash,
+            expires_at=expires_at,
+            is_active=True,
+        )
+        setattr(obj, '_plain_token', token)
+        return obj
 
     def to_representation(self, instance):
         data = super().to_representation(instance)

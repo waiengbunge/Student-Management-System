@@ -1,46 +1,56 @@
 # Business logic services for core app
+from django.utils import timezone
+
 
 class OrganizationService:
     @staticmethod
     def create_organization(data):
-        # TODO: Implement organization creation logic
-        pass
+        from platform.core.models import Organization
+        return Organization.objects.create(**data)
+
 
 class RoleService:
     @staticmethod
     def assign_role(user, role):
-        # TODO: Implement role assignment logic
-        pass
+        from apps.accounts.models import UserRole
+        ur = UserRole(user=user, role=role)
+        ur.save()
+        return ur
+
 
 class PermissionService:
     @staticmethod
     def grant_permission(role, permission):
-        # TODO: Implement permission granting logic
-        pass
+        from apps.accounts.models import RolePermission
+        return RolePermission.objects.get_or_create(role=role, permission=permission)
+
 
 class AuditLogService:
     @staticmethod
     def log_action(user, action, model, object_id, changes, organization):
-        # TODO: Implement audit logging logic
-        pass
+        from apps.common.models import AuditLog
+        tenant = getattr(user, 'tenant', None)
+        old_values = changes.get('before') if isinstance(changes, dict) else None
+        new_values = changes.get('after') if isinstance(changes, dict) else changes
+        AuditLog.objects.create(
+            tenant=tenant,
+            user=user,
+            table_name=str(model),
+            record_pk=str(object_id),
+            operation=str(action),
+            old_values_json=old_values,
+            new_values_json=new_values,
+            changed_at=timezone.now(),
+        )
+
 
 class NotificationService:
     @staticmethod
     def send_notification(user, title, message, organization):
-        # TODO: Implement notification sending logic
-        pass
-
-class OrganizationService:
-    pass
-
-class RoleService:
-    pass
-
-class PermissionService:
-    pass
-
-class AuditLogService:
-    pass
-
-class NotificationService:
-    pass
+        from platform.core.models import Notification
+        return Notification.objects.create(
+            user=user,
+            title=title,
+            message=message,
+            organization=organization,
+        )
