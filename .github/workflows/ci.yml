@@ -11,6 +11,68 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres" --health-interval=10s --health-timeout=5s --health-retries=5
+
+    env:
+      DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/test_db
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.OS }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.OS }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Wait for Postgres
+        run: |
+          for i in {1..10}; do pg_isready -h 127.0.0.1 -p 5432 && break || sleep 3; done
+
+      - name: Run migrations
+        run: |
+          python -m config.manage migrate --noinput
+
+      - name: Seed smoke data
+        run: |
+          python -m config.manage seed_smoke || true
+
+      - name: Run tests
+        run: |
+          python -m config.manage test -v 2
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
         image: postgres:15
         env:
           POSTGRES_USER: postgres

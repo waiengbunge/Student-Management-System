@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from apps.students.models import StudentProfile, GuardianProfile, Enrollment
+from apps.students.services import generate_student_number
 
 
 class GuardianProfileSerializer(serializers.ModelSerializer):
@@ -32,6 +33,19 @@ class StudentProfileSerializer(serializers.ModelSerializer):
             if 'tenant' in self.initial_data and self.initial_data.get('tenant') != getattr(tenant, 'id', None):
                 raise serializers.ValidationError('Cannot create student for a different tenant')
         return data
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        # enforce tenant for non-superusers
+        if request and not getattr(request.user, 'is_superuser', False):
+            validated_data['tenant'] = getattr(request.user, 'tenant')
+
+        tenant = validated_data.get('tenant')
+        # generate student_number if missing
+        if not validated_data.get('student_number') and tenant:
+            validated_data['student_number'] = generate_student_number(tenant)
+
+        return super().create(validated_data)
 
 
 class EnrollmentSerializer(serializers.ModelSerializer):
