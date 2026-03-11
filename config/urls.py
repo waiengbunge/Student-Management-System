@@ -102,6 +102,7 @@ urlpatterns = [
     path('logout/', accounts_views.logout_view, name='logout'),
     path('accounts/signup/', accounts_views.signup, name='signup'),
     path('accounts/change-password/', accounts_views.change_password, name='change_password'),
+    path('accounts/tokens/', accounts_views.tokens_view, name='tokens'),
     path('api/v1/attendance/', include('apps.attendance.urls')),
     path('api/v1/assessments/', include('apps.assessments.urls')),
     path('api/v1/reports/', include('apps.reports.urls')),

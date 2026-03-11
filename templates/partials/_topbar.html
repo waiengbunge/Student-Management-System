@@ -10,6 +10,7 @@
           <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">{{ request.user.email }}</a>
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
             <li><a class="dropdown-item" href="#">Profile</a></li>
+            <li><a class="dropdown-item" href="{% url 'tokens' %}">My Tokens</a></li>
             <li><a class="dropdown-item" href="#">Logout</a></li>
           </ul>
         </li>

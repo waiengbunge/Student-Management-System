@@ -9,6 +9,7 @@ from django.shortcuts import redirect
 from apps.saas.models import Tenant
 from django.contrib import messages
 from django.http import HttpResponseForbidden
+from django.utils import timezone
 
 
 @login_required
@@ -1133,3 +1134,61 @@ def admin_class_delete(request, pk):
         obj.delete()
         return redirect('admin_classes_list')
     return render(request, 'admin/classes/class_confirm_delete.html', {'classroom': obj})
+
+
+# -------------------------
+# Personal Access Token management (web UI)
+# -------------------------
+
+@login_required
+@ensure_csrf_cookie
+def tokens_view(request):
+    """Web UI for managing personal access tokens."""
+    import secrets as _secrets
+    import hashlib as _hashlib
+    import datetime
+    from apps.accounts.models import ApiKey
+
+    new_token = None
+    error = None
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'create':
+            name = request.POST.get('name', '').strip()
+            days_str = request.POST.get('expires_in_days', '').strip()
+            if not name:
+                error = 'Token name is required.'
+            else:
+                token = _secrets.token_urlsafe(32)
+                prefix = token[:8]
+                key_hash = _hashlib.sha256(token.encode()).hexdigest()
+                expires_at = None
+                if days_str:
+                    try:
+                        expires_at = timezone.now() + datetime.timedelta(days=int(days_str))
+                    except ValueError:
+                        pass
+                ApiKey.objects.create(
+                    tenant=request.user.tenant,
+                    user=request.user,
+                    name=name,
+                    key_prefix=prefix,
+                    key_hash=key_hash,
+                    expires_at=expires_at,
+                    is_active=True,
+                )
+                new_token = token
+
+        elif action == 'revoke':
+            token_id = request.POST.get('token_id')
+            ApiKey.objects.filter(pk=token_id, user=request.user).update(
+                is_active=False, key_hash='REVOKED'
+            )
+
+    tokens = ApiKey.objects.filter(user=request.user, is_active=True).order_by('-created_at')
+    return render(request, 'accounts/tokens.html', {
+        'tokens': tokens,
+        'new_token': new_token,
+        'error': error,
+    })

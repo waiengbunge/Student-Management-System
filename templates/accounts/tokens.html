@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}My Tokens — Acatech SMS{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width: 860px;">
+  <h2 class="mb-4">Personal Access Tokens</h2>
+
+  {% if new_token %}
+  <div class="alert alert-success alert-dismissible" role="alert" id="tokenBanner">
+    <strong>Token created!</strong> Copy it now — it will not be shown again.<br>
+    <code id="newTokenValue" class="user-select-all fs-6">{{ new_token }}</code>
+    <button type="button" class="btn btn-sm btn-outline-secondary ms-3" onclick="copyToken()">Copy</button>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  {% endif %}
+
+  {% if error %}
+  <div class="alert alert-danger">{{ error }}</div>
+  {% endif %}
+
+  <div class="card mb-4">
+    <div class="card-header fw-semibold">Create a new token</div>
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="create">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Token name <span class="text-danger">*</span></label>
+            <input type="text" name="name" class="form-control" placeholder="e.g. VS Code Agent" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Expires in (days) <span class="text-muted small">optional</span></label>
+            <input type="number" name="expires_in_days" class="form-control" min="1" placeholder="Never">
+          </div>
+          <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">Generate</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <h5 class="mb-3">Active tokens</h5>
+  {% if tokens %}
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Name</th>
+          <th>Prefix</th>
+          <th>Created</th>
+          <th>Last used</th>
+          <th>Expires</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tok in tokens %}
+        <tr>
+          <td>{{ tok.name }}</td>
+          <td><code>{{ tok.key_prefix }}…</code></td>
+          <td>{{ tok.created_at|date:"Y-m-d" }}</td>
+          <td>{{ tok.last_used_at|date:"Y-m-d H:i"|default:"Never" }}</td>
+          <td>{{ tok.expires_at|date:"Y-m-d"|default:"Never" }}</td>
+          <td>
+            <form method="post" onsubmit="return confirm('Revoke this token?')">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="revoke">
+              <input type="hidden" name="token_id" value="{{ tok.id }}">
+              <button type="submit" class="btn btn-sm btn-outline-danger">Revoke</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="text-muted">No active tokens. Create one above.</p>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function copyToken() {
+  var val = document.getElementById('newTokenValue').textContent.trim();
+  navigator.clipboard.writeText(val).then(function() {
+    var btn = document.querySelector('#tokenBanner .btn-outline-secondary');
+    if (btn) { btn.textContent = 'Copied!'; }
+  });
+}
+</script>
+{% endblock %}
