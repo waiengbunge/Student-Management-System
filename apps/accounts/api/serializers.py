@@ -174,3 +174,40 @@ class ApiKeySerializer(serializers.ModelSerializer):
         if token:
             data['token'] = token
         return data
+
+
+class PersonalTokenSerializer(serializers.ModelSerializer):
+    """Serializer for the self-service personal access token endpoint.
+
+    Users interact only with their own tokens; tenant and user are set
+    automatically from the authenticated request — they are never accepted
+    from the client.  The raw token is returned once, at creation time.
+    """
+
+    token = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = ApiKey
+        fields = ["id", "name", "key_prefix", "scopes_json", "last_used_at", "expires_at", "token"]
+        read_only_fields = ["key_prefix", "last_used_at"]
+
+    def create(self, validated_data):
+        request = self.context.get("request")
+        user = request.user
+        token = secrets.token_urlsafe(32)
+        prefix = token[:8]
+        key_hash = hashlib.sha256(token.encode()).hexdigest()
+        validated_data["key_prefix"] = prefix
+        validated_data["key_hash"] = key_hash
+        validated_data["user"] = user
+        validated_data["tenant"] = user.tenant
+        obj = super().create(validated_data)
+        setattr(obj, "_plain_token", token)
+        return obj
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        token = getattr(instance, "_plain_token", None)
+        if token:
+            data["token"] = token
+        return data

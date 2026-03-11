@@ -1,8 +1,9 @@
 from rest_framework import viewsets, filters
-from apps.accounts.models import User, Role, Permission, ApiKey
+from rest_framework.permissions import IsAuthenticated
+from apps.accounts.models import User, Role, Permission, ApiKey, UserRole
 from .serializers import UserSerializer, RoleSerializer, PermissionSerializer
 from .serializers import UserRoleSerializer
-from .serializers import ApiKeySerializer
+from .serializers import ApiKeySerializer, PersonalTokenSerializer
 from apps.accounts.drf_permissions import RolePermissionDRF
 from apps.api.pagination import StandardResultsSetPagination
 from rest_framework.decorators import action
@@ -172,3 +173,26 @@ class ApiKeyViewSet(viewsets.ModelViewSet):
             # restrict to tenant or keys created by the user
             qs = qs.filter(tenant=tenant)
         return qs
+
+
+class PersonalTokenViewSet(viewsets.ModelViewSet):
+    """Self-service personal access token management.
+
+    Authenticated users can list, create, and delete their own personal
+    access tokens at ``/api/v1/accounts/me/tokens/``.  Each token is
+    scoped to the requesting user; no admin permission is required.
+    """
+
+    serializer_class = PersonalTokenSerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ["get", "post", "delete", "head", "options"]
+
+    def get_queryset(self):
+        return ApiKey.objects.filter(user=self.request.user).order_by("-created_at")
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        instance.delete()
+

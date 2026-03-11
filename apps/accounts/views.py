@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login as auth_login, get_user_mode
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import Group
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from apps.saas.models import Tenant
 from django.contrib import messages
 from django.http import HttpResponseForbidden
@@ -1133,3 +1133,90 @@ def admin_class_delete(request, pk):
         obj.delete()
         return redirect('admin_classes_list')
     return render(request, 'admin/classes/class_confirm_delete.html', {'classroom': obj})
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Personal Access Token management views
+# ──────────────────────────────────────────────────────────────────────────────
+
+@login_required
+def personal_tokens(request):
+    """List the current user's personal access tokens."""
+    from apps.accounts.models import ApiKey
+    from django.utils import timezone
+
+    tokens = ApiKey.objects.filter(user=request.user).order_by('-created_at')
+    # annotate expiry status
+    now = timezone.now()
+    for tok in tokens:
+        tok.is_expired = tok.expires_at is not None and tok.expires_at < now
+
+    # pick up a freshly-created token stored in session once, then clear it
+    new_token = request.session.pop('new_pat', None)
+    return render(request, 'accounts/personal_tokens.html', {
+        'tokens': tokens,
+        'new_token': new_token,
+    })
+
+
+@login_required
+def personal_tokens_create(request):
+    """Create a new personal access token and redirect back, showing the raw token once."""
+    if request.method != 'POST':
+        return redirect('personal_tokens')
+
+    import secrets
+    import hashlib
+    from datetime import timedelta
+    from django.utils import timezone
+    from apps.accounts.models import ApiKey
+
+    name = request.POST.get('name', '').strip()
+    if not name:
+        messages.error(request, 'Token name is required.')
+        return redirect('personal_tokens')
+
+    expires_days = request.POST.get('expires_days', '').strip()
+    expires_at = None
+    if expires_days:
+        try:
+            days = int(expires_days)
+            if days < 1:
+                raise ValueError
+            expires_at = timezone.now() + timedelta(days=days)
+        except ValueError:
+            messages.error(request, 'Expires-in must be a positive number of days.')
+            return redirect('personal_tokens')
+
+    token = secrets.token_urlsafe(32)
+    prefix = token[:8]
+    key_hash = hashlib.sha256(token.encode()).hexdigest()
+
+    ApiKey.objects.create(
+        tenant=request.user.tenant,
+        user=request.user,
+        name=name,
+        key_prefix=prefix,
+        key_hash=key_hash,
+        expires_at=expires_at,
+    )
+
+    # Store the plain token in the session so it can be shown once on the listing page
+    request.session['new_pat'] = token
+    messages.success(request, f'Token "{name}" created. Copy it now — it will not be shown again.')
+    return redirect('personal_tokens')
+
+
+@login_required
+def personal_tokens_delete(request, token_id):
+    """Revoke (delete) one of the current user's personal access tokens."""
+    if request.method != 'POST':
+        return redirect('personal_tokens')
+
+    from apps.accounts.models import ApiKey
+
+    tok = get_object_or_404(ApiKey, pk=token_id, user=request.user)
+    name = tok.name
+    tok.delete()
+    messages.success(request, f'Token "{name}" has been revoked.')
+    return redirect('personal_tokens')
